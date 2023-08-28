@@ -1,4 +1,4 @@
-import ssx from "../../../pages/_ssx";
+import ssx from "../_ssx";
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers'
 
