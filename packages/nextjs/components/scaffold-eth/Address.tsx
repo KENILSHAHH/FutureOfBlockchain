@@ -33,11 +33,11 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
   const [ensAvatar, setEnsAvatar] = useState<string | null>();
   const [addressCopied, setAddressCopied] = useState(false);
 
-  const { data: fetchedEns } = useEnsName({ address, enabled: isAddress(address ?? ""), chainId: 1 });
+  const { data: fetchedEns } = useEnsName({ address, enabled: isAddress(address ?? ""), chainId: 5 });
   const { data: fetchedEnsAvatar } = useEnsAvatar({
     name: fetchedEns,
     enabled: Boolean(fetchedEns),
-    chainId: 1,
+    chainId: 5,
     cacheTime: 30_000,
   });
 
@@ -67,7 +67,7 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
   }
 
   const blockExplorerAddressLink = getBlockExplorerAddressLink(getTargetNetwork(), address);
-  let displayAddress = address?.slice(0, 5) + "..." + address?.slice(-4);
+  let displayAddress = address?.slice(0, 5) + ".." + address?.slice(-4);
 
   if (ens) {
     displayAddress = ens;

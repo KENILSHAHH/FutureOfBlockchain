@@ -6,6 +6,11 @@ import { Bars3Icon, BugAntIcon, MagnifyingGlassIcon, SparklesIcon } from "@heroi
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
 
+
+interface PageProps {
+  childComponent: React.ReactNode;
+}
+
 const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
   const router = useRouter();
   const isActive = router.pathname === href;
@@ -40,21 +45,28 @@ export const Header = () => {
         <NavLink href="/">Home</NavLink>
       </li>
       <li>
-        <NavLink href="/debug">
+        <NavLink href="/daos">
           <BugAntIcon className="h-4 w-4" />
-          Debug Contracts
+          Available DAOs
         </NavLink>
       </li>
-      <li>
-        <NavLink href="/example-ui">
+       <li>
+        <NavLink href="/joinDao">
           <SparklesIcon className="h-4 w-4" />
-          Example UI
+          
+        </NavLink>
+      </li>
+     
+      <li>
+        <NavLink href="/create">
+          <SparklesIcon className="h-4 w-4" />
+         Create Entry Restricted DAO
         </NavLink>
       </li>
       <li>
-        <NavLink href="/blockexplorer">
+        <NavLink href="/sort">
           <MagnifyingGlassIcon className="h-4 w-4" />
-          Block Explorer
+         Dao Transactions
         </NavLink>
       </li>
     </>

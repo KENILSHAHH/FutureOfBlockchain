@@ -1,87 +1,95 @@
-//SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0 <0.9.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+import "@unioncredit/v2-sdk/contracts/BaseUnionMember.sol";
+import "@unioncredit/v2-sdk/contracts/UnionVoucher.sol";
+import "@unioncredit/v2-sdk/contracts/UnionBorrower.sol";
 
-// Useful for debugging. Remove when deploying to a live network.
-import "hardhat/console.sol";
-
-// Use openzeppelin to inherit battle-tested implementations (ERC20, ERC721, etc)
-// import "@openzeppelin/contracts/access/Ownable.sol";
-
-/**
- * A smart contract that allows changing a state variable of the contract and tracking the changes
- * It also allows the owner to withdraw the Ether in the contract
- * @author BuidlGuidl
- */
 contract YourContract {
-	// State Variables
-	address public immutable owner;
-	string public greeting = "Building Unstoppable Apps!!!";
-	bool public premium = false;
-	uint256 public totalCounter = 0;
-	mapping(address => uint) public userGreetingCounter;
+	string public daoName;
+	uint256 public numberOfCommits;
+	bool public createProposal;
+	bool public voteForProposal;
+	bool public eligibleForCredit;
 
-	// Events: a way to emit log statements from smart contract that can be listened to by external parties
-	event GreetingChange(
-		address indexed greetingSetter,
-		string newGreeting,
-		bool premium,
-		uint256 value
-	);
-
-	// Constructor: Called once on contract deployment
-	// Check packages/hardhat/deploy/00_deploy_your_contract.ts
-	constructor(address _owner) {
-		owner = _owner;
+	struct Proposal {
+		string title;
+		uint256 id;
+		address creator;
+		string description;
+		uint256 votes;
+		bool executed;
 	}
 
-	// Modifier: used to define a set of rules that must be met before or after a function is executed
-	// Check the withdraw() function
-	modifier isOwner() {
-		// msg.sender: predefined variable that represents address of the account that called the current function
-		require(msg.sender == owner, "Not the Owner");
+	Proposal[] public proposals;
+	mapping(address => bool) public hasVoted;
+
+	constructor(
+		string memory _daoName,
+		uint256 _numberOfCommits,
+		bool _createProposal,
+		bool _voteForProposal,
+		bool _eligibleForCredit
+	) {
+		daoName = _daoName;
+		numberOfCommits = _numberOfCommits;
+		createProposal = _createProposal;
+		voteForProposal = _voteForProposal;
+		eligibleForCredit = _eligibleForCredit;
+	}
+
+	modifier onlyEligible() {
+		require(eligibleForCredit, "You are not eligible for credit.");
 		_;
 	}
 
-	/**
-	 * Function that allows anyone to change the state variable "greeting" of the contract and increase the counters
-	 *
-	 * @param _newGreeting (string memory) - new greeting to save on the contract
-	 */
-	function setGreeting(string memory _newGreeting) public payable {
-		// Print data to the hardhat chain console. Remove when deploying to a live network.
-		console.log(
-			"Setting new greeting '%s' from %s",
-			_newGreeting,
-			msg.sender
+	function proposal(string memory _title, string memory _description) public {
+		require(createProposal, "Creating proposals is not allowed.");
+
+		uint256 proposalId = proposals.length;
+		proposals.push(
+			Proposal({
+				title: _title,
+				id: proposalId,
+				creator: msg.sender,
+				description: _description,
+				votes: 0,
+				executed: false
+			})
+		);
+	}
+
+	function lend(address payable recipient, uint256 amount) public payable {
+		require(amount <= address(this).balance, "Insufficient balance");
+
+		recipient.transfer(amount);
+	}
+
+	function vote(uint256 _proposalId) public {
+		require(voteForProposal, "Voting for proposals is not allowed.");
+		require(!hasVoted[msg.sender], "You have already voted.");
+		require(_proposalId < proposals.length, "Invalid proposal ID.");
+
+		Proposal storage proposal = proposals[_proposalId];
+		require(!proposal.executed, "Proposal has already been executed.");
+
+		proposal.votes++;
+		hasVoted[msg.sender] = true;
+	}
+
+	function executeProposal(uint256 _proposalId) public {
+		require(_proposalId < proposals.length, "Invalid proposal ID.");
+
+		Proposal storage proposal = proposals[_proposalId];
+		require(!proposal.executed, "Proposal has already been executed.");
+		require(proposal.votes > numberOfCommits / 2, "Insufficient votes.");
+		require(
+			msg.sender == proposal.creator,
+			"Only the creator can execute."
 		);
 
-		// Change state variables
-		greeting = _newGreeting;
-		totalCounter += 1;
-		userGreetingCounter[msg.sender] += 1;
-
-		// msg.value: built-in global variable that represents the amount of ether sent with the transaction
-		if (msg.value > 0) {
-			premium = true;
-		} else {
-			premium = false;
-		}
-
-		// emit: keyword used to trigger an event
-		emit GreetingChange(msg.sender, _newGreeting, msg.value > 0, 0);
+		proposal.executed = true;
+		// Implement proposal execution logic here
 	}
 
-	/**
-	 * Function that allows the owner to withdraw all the Ether in the contract
-	 * The function can only be called by the owner of the contract as defined by the isOwner modifier
-	 */
-	function withdraw() public isOwner {
-		(bool success, ) = owner.call{ value: address(this).balance }("");
-		require(success, "Failed to send Ether");
-	}
-
-	/**
-	 * Function that allows the contract to receive ETH
-	 */
-	receive() external payable {}
+	// Additional functions for borrowing/lending money can be added here
 }
