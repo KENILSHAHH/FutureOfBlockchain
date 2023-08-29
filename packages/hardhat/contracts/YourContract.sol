@@ -4,7 +4,7 @@ import "@unioncredit/v2-sdk/contracts/BaseUnionMember.sol";
 import "@unioncredit/v2-sdk/contracts/UnionVoucher.sol";
 import "@unioncredit/v2-sdk/contracts/UnionBorrower.sol";
 
-contract YourContract {
+contract YourContract is UnionBorrower{
 	string public daoName;
 	uint256 public numberOfCommits;
 	bool public createProposal;
@@ -62,6 +62,12 @@ contract YourContract {
 		require(amount <= address(this).balance, "Insufficient balance");
 
 		recipient.transfer(amount);
+	}
+
+function borrow(address payable recipient, uint256 amount) public payable {
+		require(amount <= address(this).balance, "Insufficient balance");
+_borrow(uint96 amount):
+		
 	}
 
 	function vote(uint256 _proposalId) public {
