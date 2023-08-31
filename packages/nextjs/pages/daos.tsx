@@ -18,9 +18,6 @@ export default function daos() {
   const [githubId, setGithubId] = useState("")
   const signInWithEthereum = async (event: any) => {
     event.preventDefault()
-  setTimeout(() => {
-    setGithubId("KENILSHAHH")
-  }, 5000);
   }
   const routee = async (event: any) => {
     router.push('/joinDao')
